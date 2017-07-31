@@ -91,6 +91,7 @@ public class AntivirusServiceImpl implements AntivirusService {
 	private String mode;
 	private boolean notifyAdmin;
 	private boolean notifyUser;
+	private String[] notifyToUser;
 	private String notifyAdminTemplate;
 	private String notifyUserTemplate;
 
@@ -364,6 +365,37 @@ public class AntivirusServiceImpl implements AntivirusService {
 			logger.info(this.getClass().getName() + ": [Sending mail notify of infected to admin]");
 			actionService.executeAction(mailAction, nodeRef);
 		}
+
+		logger.info(this.getClass().getName() + "[Sending mail to users " + notifyToUser);
+
+		if(notifyToUser != null && notifyToUser.length > 0) {
+			mailAction.setParameterValue(MailActionExecuter.PARAM_TO_MANY, notifyToUser);
+			mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, "File infected!");
+
+			if (notifyUserTemplate == "") {
+				mailAction.setParameterValue(MailActionExecuter.PARAM_TEXT,
+						"File infected as NodeRef: " + nodeRef + ". Contacting with your administrator ASAP!");
+			}
+
+			else {
+				templatePATH += notifyUserTemplate + "\"";
+				resultSet = serviceRegistry.getSearchService().query(
+						new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"), SearchService.LANGUAGE_LUCENE,
+						templatePATH);
+
+				if (resultSet.length() == 0) {
+					logger.error("Template " + templatePATH + " not found.");
+					return;
+				}
+
+				mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, resultSet.getNodeRef(0));
+				mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) model);
+			}
+
+			logger.info(
+					this.getClass().getName() + ": [Sending notify mail notify of infected to " + notifyToUser + "]");
+			actionService.executeAction(mailAction, nodeRef);
+		}
 	}
 
 	/**
@@ -421,6 +453,8 @@ public class AntivirusServiceImpl implements AntivirusService {
 	public void setNotifyUser(boolean notifyUser) {
 		this.notifyUser = notifyUser;
 	}
+
+	public void setNotifyToUser(String[] notifyToUser) { this.notifyToUser = notifyToUser; }
 
 	/**
 	 * @param notifyAdminTemplate

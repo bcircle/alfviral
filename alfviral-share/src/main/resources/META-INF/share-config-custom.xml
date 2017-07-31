@@ -105,7 +105,8 @@
 	<config evaluator="string-compare" condition="DocLibActions">
 		<actions>
 			<action id="action-scan-file" type="javascript" label="actions.document.scanfile">
-				<param name="function">onActionScanFile</param>				
+				<param name="function">onActionScanFile</param>
+                <evaluator>evaluator.doclib.action.siteBased</evaluator>
 			</action>
 		</actions>
 
