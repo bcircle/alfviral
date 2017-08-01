@@ -18,12 +18,7 @@ package com.fegor.alfresco.services;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.MailActionExecuter;
@@ -366,15 +361,16 @@ public class AntivirusServiceImpl implements AntivirusService {
 			actionService.executeAction(mailAction, nodeRef);
 		}
 
-		logger.info(this.getClass().getName() + "[Sending mail to users " + notifyToUser);
+		logger.info(this.getClass().getName() + "[Sending mail to users " + Arrays.toString(notifyToUser));
 
 		if(notifyToUser != null && notifyToUser.length > 0) {
-			mailAction.setParameterValue(MailActionExecuter.PARAM_TO_MANY, notifyToUser);
+			mailAction = actionService.createAction(MailActionExecuter.NAME);
+			mailAction.setParameterValue(MailActionExecuter.PARAM_TO_MANY, (Serializable) Arrays.asList(notifyToUser));
 			mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, "File infected!");
 
 			if (notifyUserTemplate == "") {
 				mailAction.setParameterValue(MailActionExecuter.PARAM_TEXT,
-						"File infected as NodeRef: " + nodeRef + ". Contacting with your administrator ASAP!");
+						"File infected as NodeRef: " + nodeRef + ". Contacting with your administrator Alfresco!");
 			}
 
 			else {
@@ -393,7 +389,7 @@ public class AntivirusServiceImpl implements AntivirusService {
 			}
 
 			logger.info(
-					this.getClass().getName() + ": [Sending notify mail notify of infected to " + notifyToUser + "]");
+					this.getClass().getName() + ": [Sending notify mail notify of infected to " + Arrays.toString(notifyToUser) + "]");
 			actionService.executeAction(mailAction, nodeRef);
 		}
 	}
